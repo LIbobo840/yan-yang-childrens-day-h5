@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>给颜杨的小星球</title>
+<style>
+:root{
+  --bg:#f6ead2; --brown:#5a341d; --gold:#f4bf48; --gold2:#f6d06b; --cream:#fff7e7; --red:#d76b57;
+  --shadow: rgba(90,52,29,.18); --line: rgba(90,52,29,.18);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:radial-gradient(circle at top,#fff8ec,#f4e5c5 70%);font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;color:var(--brown);overflow:hidden}
+body{display:grid;place-items:center}
+#app{position:relative;width:min(100vw,56.28dvh);height:min(100dvh,177.73vw);max-height:100dvh;aspect-ratio:941/1672;overflow:hidden;border-radius:18px;box-shadow:0 18px 45px rgba(90,52,29,.14);background:#f9efd8}
+.scene{position:absolute;inset:0;opacity:0;pointer-events:none;transform:translateX(24px) scale(.985);transition:opacity .45s ease, transform .45s ease}
+.scene.active{opacity:1;pointer-events:auto;transform:translateX(0) scale(1)}
+.base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;user-select:none;-webkit-user-drag:none}
+.overlay{position:absolute;inset:0;pointer-events:none}
+.sticker{position:absolute;display:grid;place-items:center;padding:.5em .9em;background:rgba(255,248,232,.92);border:2px dashed rgba(90,52,29,.28);border-radius:999px;box-shadow:0 6px 0 rgba(244,191,72,.22);font-size:14px;letter-spacing:.06em;opacity:0;transform:translateY(12px) scale(.9);transition:.35s ease;white-space:nowrap;color:var(--brown);z-index:12}
+.sticker.show{opacity:1;transform:translateY(0) scale(1)}
+.sparkles{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:5}
+.spark{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(244,191,72,.18);animation:pop .8s ease-out forwards}
+@keyframes pop{0%{transform:translate(0,0) scale(.6);opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+.float-star{position:absolute;color:#f1c34f;font-size:18px;animation:twinkle 2.4s ease-in-out infinite;filter:drop-shadow(0 2px 0 rgba(90,52,29,.08));z-index:6}
+.float-heart{position:absolute;color:#e28872;font-size:18px;animation:floaty 3.2s ease-in-out infinite;z-index:6}
+.float-plane{position:absolute;font-size:28px;z-index:7;animation:planeFloat 3.4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{transform:scale(1);opacity:.82}50%{transform:scale(1.25);opacity:1}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes planeFloat{0%,100%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(6px,-6px) rotate(-8deg)}}
+.hotspot{position:absolute;background:transparent;border:none;pointer-events:auto;cursor:pointer;z-index:10}
+.hotspot::after{content:"";position:absolute;inset:-2px;border-radius:999px;box-shadow:0 0 0 0 rgba(244,191,72,.55);animation:pulse 2.2s ease-in-out infinite;opacity:0}
+.hotspot.cta::after{opacity:1}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(244,191,72,0);transform:scale(1)}50%{box-shadow:0 0 0 10px rgba(244,191,72,.14);transform:scale(1.02)}}
+.btn-glow{position:absolute;inset:-8px;border-radius:999px;background:radial-gradient(circle, rgba(255,220,120,.38), rgba(255,220,120,0));filter:blur(10px);opacity:.8;animation:breathe 2.2s ease-in-out infinite;pointer-events:none}
+@keyframes breathe{0%,100%{transform:scale(.98);opacity:.45}50%{transform:scale(1.05);opacity:.92}}
+.music{position:absolute;right:3%;top:1.2%;width:12%;height:7%;border-radius:50%;z-index:15;border:none;background:transparent;cursor:pointer}
+.tip{position:absolute;left:50%;top:13.4%;transform:translateX(-50%);padding:.42em .9em;border-radius:999px;background:rgba(255,248,232,.92);border:2px dashed rgba(90,52,29,.28);font-size:14px;letter-spacing:.04em;box-shadow:0 6px 0 rgba(244,191,72,.18);opacity:0;transition:.35s;z-index:12;pointer-events:none}
+.tip.show{opacity:1}
+.ticket-scan{position:absolute;left:8%;top:22%;width:84%;height:33%;border-radius:24px;overflow:hidden;pointer-events:none;z-index:8;opacity:0}
+.ticket-scan::after{content:"";position:absolute;top:-20%;left:-35%;width:42%;height:140%;transform:rotate(20deg);background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.62), rgba(255,255,255,0));animation:scan 1.2s ease forwards}
+@keyframes scan{to{left:120%}}
+.big-stamp{position:absolute;left:68%;top:50.8%;transform:translate(-50%,-50%) scale(0) rotate(-12deg);width:26%;aspect-ratio:1/1;border:4px solid rgba(207,87,67,.78);border-radius:50%;display:grid;place-items:center;color:rgba(207,87,67,.88);font-weight:700;font-size:clamp(18px,2.8vw,30px);letter-spacing:.1em;background:rgba(255,248,232,.28);backdrop-filter:blur(1px);z-index:12;pointer-events:none}
+.big-stamp.show{animation:stamp .55s cubic-bezier(.2,1.4,.25,1) forwards}
+@keyframes stamp{0%{transform:translate(-50%,-50%) scale(1.7) rotate(-18deg);opacity:0}70%{transform:translate(-50%,-50%) scale(.88) rotate(-12deg);opacity:1}100%{transform:translate(-50%,-50%) scale(1) rotate(-12deg);opacity:1}}
+.big-stamp span{display:block;text-align:center;line-height:1.2}
+.paws{position:absolute;right:11%;top:35%;display:flex;flex-direction:column;gap:10px;z-index:9;opacity:0;transition:.3s}
+.paws.show{opacity:.8}
+.paw{font-size:18px;transform:rotate(16deg);animation:fadepaw .9s ease forwards}
+.paw:nth-child(2){animation-delay:.1s}.paw:nth-child(3){animation-delay:.2s}
+@keyframes fadepaw{from{opacity:0;transform:translateY(8px) rotate(16deg)}to{opacity:1;transform:translateY(0) rotate(16deg)}}
+.card-hotspot{position:absolute;border-radius:18px}
+.card-select{position:absolute;inset:0;border-radius:18px;border:3px dashed rgba(244,191,72,.96);background:rgba(255,248,232,.16);box-shadow:0 0 0 6px rgba(244,191,72,.16);opacity:0;transform:scale(.97);transition:.28s}
+.card-hotspot.selected .card-select{opacity:1;transform:scale(1)}
+.card-select::after{content:'★';position:absolute;right:10px;top:8px;color:#f2c54f;font-size:22px;filter:drop-shadow(0 2px 0 rgba(90,52,29,.1));animation:twinkle 1.8s infinite}
+.next-dim{opacity:.25;filter:saturate(.75)}
+.star-btn{position:absolute;width:18%;aspect-ratio:1/1;background:transparent;border:none;z-index:10}
+.star-fill{position:absolute;inset:10%;display:grid;place-items:center;font-size:54px;color:#f3c248;opacity:0;transform:scale(.5);transition:.25s;pointer-events:none;filter:drop-shadow(0 3px 0 rgba(90,52,29,.08))}
+.star-btn.lit .star-fill{opacity:1;transform:scale(1)}
+.star-btn.lit{animation:starPop .35s ease}
+@keyframes starPop{0%{transform:scale(.6)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+.note-card{position:absolute;left:12%;bottom:16.8%;width:76%;padding:14px 16px;border-radius:18px;background:rgba(255,248,232,.92);border:2px dashed rgba(90,52,29,.24);font-size:15px;line-height:1.7;text-align:center;box-shadow:0 8px 0 rgba(244,191,72,.18);z-index:12;opacity:0;transform:translateY(12px);transition:.3s;pointer-events:none}
+.note-card.show{opacity:1;transform:translateY(0)}
+.letter-open{position:absolute;left:7%;bottom:22%;width:86%;height:26%;border-radius:24px;overflow:hidden;z-index:9;pointer-events:none}
+.letter-open::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg, rgba(255,255,255,.0) 0%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 100%);transform:translateX(-110%);opacity:0}
+.letter-open.show::after{animation:shine 1s ease forwards;opacity:1}
+@keyframes shine{to{transform:translateX(110%)}}
+.replay-sticker{position:absolute;left:6%;bottom:10.5%;padding:10px 16px;border-radius:999px;background:rgba(255,248,232,.96);border:2px dashed rgba(90,52,29,.24);box-shadow:0 5px 0 rgba(244,191,72,.14);font-size:14px;z-index:12;pointer-events:auto;cursor:pointer}
+.toast{position:absolute;left:50%;top:6%;transform:translateX(-50%) translateY(-12px);padding:10px 16px;border-radius:999px;background:rgba(90,52,29,.86);color:#fffdf7;font-size:13px;letter-spacing:.04em;opacity:0;transition:.25s;z-index:25;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.fly-plane{position:absolute;left:80%;top:6%;font-size:28px;z-index:18;pointer-events:none;opacity:0}
+.fly-plane.go{animation:flyOut 1s ease-in forwards}
+@keyframes flyOut{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:1;transform:translate(-84vw,70vh) rotate(-20deg)}}
+.fade-mask{position:absolute;inset:0;background:radial-gradient(circle at center, rgba(255,247,231,0), rgba(255,247,231,.75) 55%, rgba(255,247,231,1));opacity:0;pointer-events:none;z-index:20}
+.fade-mask.show{animation:fadeMask .55s ease forwards}
+@keyframes fadeMask{from{opacity:0}to{opacity:1}}
+.smalltag{position:absolute;padding:8px 12px;border-radius:16px;background:rgba(255,248,232,.9);border:2px dashed rgba(90,52,29,.22);box-shadow:0 4px 0 rgba(244,191,72,.14);font-size:13px;z-index:12;opacity:0;transform:scale(.9);transition:.25s}
+.smalltag.show{opacity:1;transform:scale(1)}
+#saveHint{top:8%;left:50%;transform:translateX(-50%)}
+@media (max-width:420px){.tip,.sticker,.note-card,.replay-sticker,.smalltag{font-size:12px}.star-fill{font-size:42px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="toast" id="toast"></div>
+  <div class="fly-plane" id="flyPlane">✈️</div>
+  <div class="fade-mask" id="fadeMask"></div>
+
+  <!-- page1 -->
+  <section class="scene active" data-page="1">
+    <img class="base" src="assets/page1.png" alt="page1" />
+    <div class="overlay">
+      <div class="sparkles" id="sparks1"></div>
+      <div class="float-star" style="left:11%;top:9%">★</div>
+      <div class="float-star" style="left:81%;top:15%;animation-delay:.6s">✦</div>
+      <div class="float-heart" style="left:53%;top:45%">♥</div>
+      <button class="music" data-music aria-label="音乐"></button>
+      <button class="hotspot cta" id="p1Start" style="left:14%;bottom:4.7%;width:72%;height:9%"><span class="btn-glow"></span></button>
+      <div class="tip" id="p1Tip">点一下，进入小朋友模式</div>
+    </div>
+  </section>
+
+  <!-- page2 -->
+  <section class="scene" data-page="2">
+    <img class="base" src="assets/page2.png" alt="page2" />
+    <div class="overlay">
+      <div class="sparkles" id="sparks2"></div>
+      <div class="float-star" style="left:8%;top:7%">✦</div>
+      <div class="float-star" style="left:86%;top:11%;animation-delay:.8s">★</div>
+      <div class="float-heart" style="left:76%;top:58%">♥</div>
+      <button class="music" data-music aria-label="音乐"></button>
+      <div class="ticket-scan" id="ticketScan"></div>
+      <div class="big-stamp" id="bigStamp"><span>认证<br>成功</span></div>
+      <div class="paws" id="paws"><div class="paw">🐾</div><div class="paw">🐾</div><div class="paw">🐾</div></div>
+      <div class="sticker" id="p2Sticker" style="left:50%;top:68%;transform:translate(-50%,12px) scale(.9)">已收到小星球通行证</div>
+      <button class="hotspot cta" id="p2Get" style="left:11%;bottom:4.8%;width:78%;height:9%"><span class="btn-glow"></span></button>
+    </div>
+  </section>
+
+  <!-- page3 -->
+  <section class="scene" data-page="3">
+    <img class="base" src="assets/page3.png" alt="page3" />
+    <div class="overlay">
+      <div class="sparkles" id="sparks3"></div>
+      <div class="float-star" style="left:9%;top:18%">★</div>
+      <div class="float-star" style="left:86%;top:21%;animation-delay:.8s">✦</div>
+      <div class="float-plane" style="left:10%;top:79%">✈️</div>
+      <button class="music" data-music aria-label="音乐"></button>
+      <div class="tip" id="p3Tip" style="top:31.2%">选一份，带走今天的小开心</div>
+      <button class="hotspot card-hotspot" data-gift="一颗糖" data-text="甜一点，烦恼少一点。" style="left:8%;top:49%;width:36%;height:17%"><span class="card-select"></span></button>
+      <button class="hotspot card-hotspot" data-gift="一朵玫瑰" data-text="愿你被认真喜欢。" style="left:55%;top:49%;width:36%;height:17%"><span class="card-select"></span></button>
+      <button class="hotspot card-hotspot" data-gift="一只狐狸" data-text="愿你总被温柔理解。" style="left:8%;top:68.5%;width:36%;height:17%"><span class="card-select"></span></button>
+      <button class="hotspot card-hotspot" data-gift="一架纸飞机" data-text="愿你随时飞回快乐里。" style="left:55%;top:68.5%;width:36%;height:17%"><span class="card-select"></span></button>
+      <div class="sticker" id="p3Sticker" style="left:50%;top:87.4%;transform:translate(-50%,12px) scale(.9)"></div>
+      <button class="hotspot cta next-dim" id="p3Next" style="left:11%;bottom:4.2%;width:78%;height:9%"><span class="btn-glow"></span></button>
+    </div>
+  </section>
+
+  <!-- page4 -->
+  <section class="scene" data-page="4">
+    <img class="base" src="assets/page4.png" alt="page4" />
+    <div class="overlay">
+      <div class="sparkles" id="sparks4"></div>
+      <div class="float-star" style="left:12%;top:16%">✦</div>
+      <div class="float-star" style="left:83%;top:17%;animation-delay:1s">★</div>
+      <button class="music" data-music aria-label="音乐"></button>
+      <div class="tip" id="p4Tip" style="top:22.2%">点亮它们，把快乐收好</div>
+      <button class="hotspot star-btn" data-star="1" style="left:6%;top:29.3%"><span class="star-fill">★</span></button>
+      <button class="hotspot star-btn" data-star="2" style="left:41.3%;top:23.8%"><span class="star-fill">★</span></button>
+      <button class="hotspot star-btn" data-star="3" style="left:75.3%;top:29.6%"><span class="star-fill">★</span></button>
+      <button class="hotspot star-btn" data-star="4" style="left:7.2%;top:64.4%"><span class="star-fill">★</span></button>
+      <button class="hotspot star-btn" data-star="5" style="left:74.7%;top:64.2%"><span class="star-fill">★</span></button>
+      <div class="sticker" id="p4Sticker" style="left:50%;top:79.7%;transform:translate(-50%,12px) scale(.9)">快乐已收好</div>
+      <button class="hotspot cta next-dim" id="p4Next" style="left:18%;bottom:4.4%;width:64%;height:8.5%"><span class="btn-glow"></span></button>
+    </div>
+  </section>
+
+  <!-- page5 -->
+  <section class="scene" data-page="5">
+    <img class="base" src="assets/page5.png" alt="page5" />
+    <div class="overlay">
+      <div class="sparkles" id="sparks5"></div>
+      <div class="float-star" style="left:14%;top:14%">✦</div>
+      <div class="float-heart" style="left:84%;top:39%">♥</div>
+      <button class="music" data-music aria-label="音乐"></button>
+      <div class="tip" id="p5Tip" style="top:24.8%">轻点狐狸、玫瑰或信纸</div>
+      <div class="letter-open" id="letterOpen"></div>
+      <button class="hotspot" id="foxTap" style="left:17%;top:35%;width:17%;height:15%"></button>
+      <button class="hotspot" id="roseTap" style="left:66%;top:40%;width:14%;height:15%"></button>
+      <button class="hotspot" id="letterTap" style="left:10%;top:54%;width:80%;height:24%"></button>
+      <div class="smalltag" id="foxTag" style="left:11%;top:47%">被懂得也是一种幸福</div>
+      <div class="smalltag" id="roseTag" style="left:57%;top:53%">愿你一直被温柔对待</div>
+      <div class="note-card" id="p5Note">忙的时候，也别忘了开心。<br>你值得被好好哄一哄。</div>
+      <button class="hotspot cta" id="p5Next" style="left:18%;bottom:4.4%;width:64%;height:8.6%"><span class="btn-glow"></span></button>
+    </div>
+  </section>
+
+  <!-- page6 -->
+  <section class="scene" data-page="6">
+    <img class="base" src="assets/page6.png" alt="page6" />
+    <div class="overlay">
+      <div class="sparkles" id="sparks6"></div>
+      <div class="float-star" style="left:10%;top:13%">★</div>
+      <div class="float-star" style="left:87%;top:16%;animation-delay:.9s">✦</div>
+      <div class="float-heart" style="left:18%;top:47%">♥</div>
+      <button class="music" data-music aria-label="音乐"></button>
+      <div class="tip" id="saveHint" class="tip">点按钮保存祝福卡</div>
+      <button class="hotspot cta" id="saveBtn" style="left:18%;bottom:4.3%;width:64%;height:9%"><span class="btn-glow"></span></button>
+      <button class="replay-sticker" id="replayBtn">再看一遍</button>
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+  const scenes = [...document.querySelectorAll('.scene')];
+  const toast = document.getElementById('toast');
+  const fadeMask = document.getElementById('fadeMask');
+  const flyPlane = document.getElementById('flyPlane');
+  let current = 0;
+  let audioCtx = null, musicOn = false;
+  const stage = document.getElementById('app');
+
+  function showToast(text, t=1500){toast.textContent=text;toast.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.classList.remove('show'),t)}
+  function beep(freq=560, dur=.08, gain=.03){ if(!musicOn) return; if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='triangle'; o.frequency.value=freq; g.gain.value=gain; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur); o.stop(audioCtx.currentTime+dur); }
+  document.querySelectorAll('[data-music]').forEach(btn=>btn.addEventListener('click', async (e)=>{e.stopPropagation(); musicOn=!musicOn; if(musicOn){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') await audioCtx.resume(); showToast('提示音已开启'); beep(660,.1,.035);} else showToast('提示音已关闭'); }));
+  
+  function sceneEl(i){return scenes[i]}
+  function go(i){ if(i<0 || i>=scenes.length || i===current) return; scenes[current].classList.remove('active'); current=i; scenes[current].classList.add('active'); const tip=scenes[current].querySelector('.tip'); if(tip){ setTimeout(()=>tip.classList.add('show'),180); setTimeout(()=>tip.classList.remove('show'),2000);} }
+  function sparkAt(container, x, y, n=12){ for(let i=0;i<n;i++){ const s=document.createElement('span'); s.className='spark'; s.style.left=x+'px'; s.style.top=y+'px'; const a=Math.random()*Math.PI*2, d=20+Math.random()*48; s.style.setProperty('--tx', Math.cos(a)*d+'px'); s.style.setProperty('--ty', Math.sin(a)*d+'px'); container.appendChild(s); setTimeout(()=>s.remove(),800); } }
+  function localPos(container, evt){ const r=container.getBoundingClientRect(); const x = (evt.clientX ?? (evt.changedTouches&&evt.changedTouches[0].clientX) ?? r.left + r.width/2) - r.left; const y = (evt.clientY ?? (evt.changedTouches&&evt.changedTouches[0].clientY) ?? r.top + r.height/2) - r.top; return {x,y}; }
+  function pulseHotspot(id, containerId){ const el=document.getElementById(id), c=document.getElementById(containerId); ['click','touchend','pointerup'].forEach(type=>el.addEventListener(type, e=>{ const {x,y}=localPos(c,e); sparkAt(c,x,y,13); beep(580+Math.random()*160,.08,.03); }, {passive:true})); }
+  ['p1Start','p2Get','p3Next','p4Next','p5Next','saveBtn'].forEach((id,idx)=> pulseHotspot(id,'sparks'+(Math.min(idx+1,6))));
+
+  // page1
+  const p1Tip = document.getElementById('p1Tip'); setTimeout(()=>p1Tip.classList.add('show'),280); setTimeout(()=>p1Tip.classList.remove('show'),2100);
+  document.getElementById('p1Start').addEventListener('click', ()=>{
+    flyPlane.classList.add('go'); fadeMask.classList.add('show'); showToast('小朋友模式启动中…',900); setTimeout(()=>{ flyPlane.classList.remove('go'); fadeMask.classList.remove('show'); go(1); }, 620); beep(720,.11,.035);
+  });
+
+  // page2
+  let p2Done=false; document.getElementById('p2Get').addEventListener('click', ()=>{
+    if(p2Done) return; p2Done=true; document.getElementById('ticketScan').style.opacity='1'; document.getElementById('bigStamp').classList.add('show'); document.getElementById('paws').classList.add('show'); const st=document.getElementById('p2Sticker'); st.textContent='已收到小星球通行证'; setTimeout(()=>{st.classList.add('show')},260); beep(520,.07,.03); setTimeout(()=>beep(700,.08,.03),120); setTimeout(()=>go(2), 1150);
+  });
+
+  // page3
+  let selectedGift=''; const p3Next=document.getElementById('p3Next');
+  document.querySelectorAll('[data-gift]').forEach(btn=>btn.addEventListener('click', e=>{
+    document.querySelectorAll('[data-gift]').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); selectedGift=btn.dataset.gift; const st=document.getElementById('p3Sticker'); st.textContent = btn.dataset.text; st.classList.add('show'); p3Next.classList.remove('next-dim'); const {x,y}=localPos(document.getElementById('sparks3'), e); sparkAt(document.getElementById('sparks3'),x,y,16); beep(620,.08,.03);
+  }));
+  p3Next.addEventListener('click', ()=>{ if(!selectedGift){showToast('先选一份补给呀');return;} go(3); });
+
+  // page4
+  const lit = new Set(); const p4Next=document.getElementById('p4Next'); document.querySelectorAll('.star-btn').forEach(btn=>btn.addEventListener('click', e=>{
+    const id=btn.dataset.star; if(lit.has(id)) return; lit.add(id); btn.classList.add('lit'); const {x,y}=localPos(document.getElementById('sparks4'), e); sparkAt(document.getElementById('sparks4'),x,y,16); beep(500 + lit.size*70,.08,.03); if(lit.size===5){ document.getElementById('p4Sticker').classList.add('show'); p4Next.classList.remove('next-dim'); showToast('快乐已收好'); }
+  }));
+  p4Next.addEventListener('click', ()=>{ if(lit.size<5){showToast('再点亮几颗星星吧');return;} go(4); });
+
+  // page5
+  function tagShow(id){ const el=document.getElementById(id); el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1800); }
+  document.getElementById('foxTap').addEventListener('click', e=>{ tagShow('foxTag'); const {x,y}=localPos(document.getElementById('sparks5'), e); sparkAt(document.getElementById('sparks5'),x,y,10); beep(560,.06,.03); });
+  document.getElementById('roseTap').addEventListener('click', e=>{ tagShow('roseTag'); const {x,y}=localPos(document.getElementById('sparks5'), e); sparkAt(document.getElementById('sparks5'),x,y,10); beep(630,.06,.03); });
+  document.getElementById('letterTap').addEventListener('click', e=>{ document.getElementById('letterOpen').classList.add('show'); document.getElementById('p5Note').classList.add('show'); const {x,y}=localPos(document.getElementById('sparks5'), e); sparkAt(document.getElementById('sparks5'),x,y,16); beep(690,.09,.03); });
+  document.getElementById('p5Next').addEventListener('click', ()=>go(5));
+
+  // page6
+  const saveHint=document.getElementById('saveHint'); setTimeout(()=>saveHint.classList.add('show'),200);
+  document.getElementById('saveBtn').addEventListener('click', ()=>{
+    const link=document.createElement('a'); link.href = document.querySelector('[data-page="6"] .base').src; link.download='颜杨-儿童节快乐卡.png'; link.click(); showToast('祝福卡已开始下载'); beep(760,.1,.035);
+  });
+  document.getElementById('replayBtn').addEventListener('click', ()=>{ window.scrollTo(0,0); go(0); });
+
+  // global tap sparkle
+  stage.addEventListener('pointerup', e=>{
+    const active = scenes[current].querySelector('.sparkles'); if(!active) return; const {x,y}=localPos(active, e); sparkAt(active,x,y,7);
+  });
+})();
+</script>
+</body>
+</html>
